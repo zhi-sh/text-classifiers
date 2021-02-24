@@ -7,9 +7,6 @@ from abc import ABC, abstractmethod
 
 
 class AbstractModel(ABC):
-    @abstractmethod
-    def get_embedding_dimension(self) -> int:
-        pass
 
     @abstractmethod
     def save(self, output_path: str):

@@ -13,7 +13,7 @@ class AbstractTokenizer(ABC):
         pass
 
     @abstractmethod
-    def get_vocab(self, vocab: Iterable[str]):
+    def get_vocab(self):
         pass
 
     @abstractmethod

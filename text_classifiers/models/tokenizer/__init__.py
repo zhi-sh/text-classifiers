@@ -3,5 +3,5 @@
 # @Author   :zhi.liu
 
 # ------------------------------------------------------------------------------
-from text_classifier.models.tokenizer.AbstractTokenizer import AbstractTokenizer
-from text_classifier.models.tokenizer.CharTokenizer import CharTokenizer
+from text_classifiers.models.tokenizer.AbstractTokenizer import AbstractTokenizer
+from text_classifiers.models.tokenizer.CharTokenizer import CharTokenizer

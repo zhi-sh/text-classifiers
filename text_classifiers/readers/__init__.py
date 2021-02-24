@@ -3,5 +3,5 @@
 # @Author   :zhi.liu
 
 # ------------------------------------------------------------------------------
-from text_classifier.readers.InputExample import InputExample
-from text_classifier.readers.ReaderWaiMai import ReaderWaiMai
+from text_classifiers.readers.InputExample import InputExample
+from text_classifiers.readers.ReaderWaiMai import ReaderWaiMai

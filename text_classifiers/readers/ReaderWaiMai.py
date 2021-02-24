@@ -5,7 +5,7 @@
 # ------------------------------------------------------------------------------
 import os
 import pandas as pd
-from text_classifier.readers import InputExample
+from text_classifiers.readers import InputExample
 
 
 class ReaderWaiMai:
