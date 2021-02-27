@@ -20,10 +20,14 @@ logger = logging.getLogger(__name__)
 class WordEmbeddings(nn.Module, AbstractModel):
     r'''
     该模块必须基于一个已训练的词向量进行初始化，因为需要自动确认Embedding的维度。故请使用WordEmbeddings.from_text_file(w2v_file_path)来创建对象
+
+    输出: [batch, seq_len, word_embedding_dim]
     '''
 
     def __init__(self, tokenizer: AbstractTokenizer, embedding_weights, update_embeddings: bool = False, max_seq_length: int = 1000000):
         super(WordEmbeddings, self).__init__()
+        self.config_keys = ['update_embeddings', 'max_seq_length']
+
         if isinstance(embedding_weights, list):
             embedding_weights = np.asarray(embedding_weights)
         if isinstance(embedding_weights, np.ndarray):
@@ -39,11 +43,12 @@ class WordEmbeddings(nn.Module, AbstractModel):
         self.tokenizer = tokenizer
         self.update_embeddings = update_embeddings
         self.max_seq_length = max_seq_length
+        self.token_name = 'token_embeddings'
 
     def forward(self, features):
         token_embeddings = self.emb_layer(features['input_ids'])
         cls_tokens = None
-        features.update({'token_embeddings': token_embeddings, 'cls_token_embeddings': cls_tokens})
+        features.update({self.token_name: token_embeddings, 'cls_token_embeddings': cls_tokens})
         return features
 
     def tokenize(self, texts: List[str]):
@@ -72,16 +77,14 @@ class WordEmbeddings(nn.Module, AbstractModel):
     def dimension(self) -> int:
         return self.embedding_dimension
 
+    @property
+    def embedding_name(self) -> str:
+        return self.token_name
+
     def get_config_dict(self):
-        return {'tokenizer_class': utils.fullname(self.tokenizer), 'update_embeddings': self.update_embeddings, 'max_seq_length': self.max_seq_length}
-
-    def save(self, output_path: str):
-        saved_config_path = os.path.join(output_path, 'config.json')
-        saved_model_path = os.path.join(output_path, 'pytorch_model.bin')
-
-        tools.json_save(self.get_config_dict(), saved_config_path, indent=2)
-        torch.save(self.state_dict(), saved_model_path)
-        self.tokenizer.save(output_path)
+        dic = {key: self.__dict__[key] for key in self.config_keys}
+        dic['tokenizer_class'] = utils.fullname(self.tokenizer)
+        return dic
 
     @staticmethod
     def load(input_path: str):

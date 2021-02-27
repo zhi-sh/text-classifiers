@@ -3,15 +3,16 @@
 # @Author   :zhi.liu
 
 # ------------------------------------------------------------------------------
-import os, json
-from typing import List, Tuple, Dict, Union
+import os
+from typing import Dict
 
 import torch
 from torch import nn, Tensor
 from text_classifiers.tools import tools
+from text_classifiers.models import AbstractModel
 
 
-class Pooling(nn.Module):
+class Pooling(nn.Module, AbstractModel):
     r'''Performs pooling (max or mean) on the token embeddings.
     Using pooling, it generates from a variable sized sentence a fixed sized sentence embedding. This layer also allows to use the CLS token if it is returned by the underlying word embedding model.
     You can concatenate multiple poolings together.
@@ -21,6 +22,9 @@ class Pooling(nn.Module):
     :param pooling_mode_max_tokens: 使用 max-pooling 代表文本的语义
     :param pooling_mode_mean_tokens: 使用 mean-pooling 代表文本的语义
     :param pooling_mode_mean_sqrt_len_tokens: 使用 mean-pooling/text_length 代表文本的语义
+
+    输入：[bs, seq_len, dimension]
+    输出：[bs, dimension * (启用的池化数量)]
     '''
 
     def __init__(self, word_embedding_dimension: int, pooling_mode_cls_token: bool = False, pooling_mode_max_tokens: bool = False, pooling_mode_mean_tokens: bool = True,
@@ -37,7 +41,7 @@ class Pooling(nn.Module):
         self.pooling_output_dimension = (pooling_mode_multiplier * word_embedding_dimension)
 
     def forward(self, features: Dict[str, Tensor]):
-        token_embeddings = features['token_embeddings']
+        text_embeddings = features['text_embeddings']
         cls_token = features['cls_token_embeddings']
         attention_mask = features['attention_mask']
 
@@ -46,13 +50,13 @@ class Pooling(nn.Module):
         if self.pooling_mode_cls_token:
             output_vectors.append(cls_token)
         if self.pooling_mode_max_tokens:
-            input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
-            token_embeddings[input_mask_expanded == 0] = -1e9  # Set Padding token to large negative value
-            max_over_time = torch.max(token_embeddings, 1)[0]
+            input_mask_expanded = attention_mask.unsqueeze(-1).expand(text_embeddings.size()).float()
+            text_embeddings[input_mask_expanded == 0] = -1e9  # Set Padding token to large negative value
+            max_over_time = torch.max(text_embeddings, 1)[0]
             output_vectors.append(max_over_time)
         if self.pooling_mode_mean_tokens or self.pooling_mode_mean_sqrt_len_tokens:
-            input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
-            sum_embeddings = torch.sum(token_embeddings * input_mask_expanded, 1)
+            input_mask_expanded = attention_mask.unsqueeze(-1).expand(text_embeddings.size()).float()
+            sum_embeddings = torch.sum(text_embeddings * input_mask_expanded, 1)
 
             # if tokens are weighted (by WordWeights layer), feature 'token_weights_sum' will be present
             if 'token_weights_sum' in features:
@@ -73,9 +77,6 @@ class Pooling(nn.Module):
     @property
     def dimension(self):
         return self.pooling_output_dimension
-
-    def get_config_dict(self):
-        return {key: self.__dict__[key] for key in self.config_keys}
 
     def save(self, output_path: str):
         saved_config_path = os.path.join(output_path, 'config.json')
