@@ -9,3 +9,4 @@ from text_classifiers.models.Dense import Dense
 from text_classifiers.models.Pooling import Pooling
 from text_classifiers.models.Dropout import Dropout
 from text_classifiers.models.CNN1D import CNN1D
+from text_classifiers.models.Transformer import Transformer
