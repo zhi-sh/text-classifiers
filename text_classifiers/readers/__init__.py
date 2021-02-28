@@ -5,3 +5,4 @@
 # ------------------------------------------------------------------------------
 from text_classifiers.readers.InputExample import InputExample
 from text_classifiers.readers.ReaderWaiMai import ReaderWaiMai
+from text_classifiers.readers.ReaderNews41 import ReaderNews41
