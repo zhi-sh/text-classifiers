@@ -22,7 +22,7 @@ class Transformer(nn.Module, AbstractModel):
 
         config = transformers.AutoConfig.from_pretrained(model_name_or_path, **model_args, cache_dir=cache_dir)
         self.auto_model = transformers.AutoModel.from_pretrained(model_name_or_path, config=config, cache_dir=cache_dir)
-        self.tokenizer = transformers.AutoTokenizer.from_pretrained(model_name_or_path, cache_dir=cache_dir, *tokenizer_args)
+        self.tokenizer = transformers.AutoTokenizer.from_pretrained(model_name_or_path, cache_dir=cache_dir, **tokenizer_args)
 
     def forward(self, features):
         trans_features = {'input_ids': features['input_ids'], 'attention_mask': features['attention_mask']}
