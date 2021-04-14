@@ -117,8 +117,8 @@ class AbstractFramework(nn.Sequential, ABC):
         dataloader = self._dataloader(dataset)
         labels_list = []
         preds_list = []
-        for data in dataloader:
-            features, labels = data['x'], data['y']
+        for batch in dataloader:
+            features, labels = batch['x'], batch['y']
             labels_list.append(labels.cpu().detach().numpy())
             with torch.no_grad():
                 logits = self(features)
@@ -159,10 +159,9 @@ class AbstractFramework(nn.Sequential, ABC):
         loss_model.eval()
         dataloader = self._dataloader(dataset=dataset)
         losses = []
-        for data in dataloader:
-            features, labels = data['x'], data['y']
+        for batch in dataloader:
             with torch.no_grad():
-                loss_value = loss_model(features, labels)
+                loss_value = loss_model(batch)
                 losses.append(loss_value.cpu().detach().numpy())
         losses = np.asarray(losses)
         valid_loss = losses.mean()
