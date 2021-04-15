@@ -185,14 +185,14 @@ class AbstractFramework(nn.Sequential, ABC):
         if mtype == 'accuracy':
             return {'accuracy': metrics.accuracy_score(y_true, y_pred)}
         elif mtype == 'f1_score':
-            return {'f1_score': metrics.f1_score(y_true, y_pred)}
+            return {'f1_score': metrics.f1_score(y_true, y_pred, average='weighted')}
         elif mtype == 'auc':
             from sklearn.metrics import roc_auc_score
             return {'auc': metrics.roc_auc_score(y_true, y_pred)}
         elif mtype == 'precision':
-            return {'precision': metrics.precision_score(y_true, y_pred)}
+            return {'precision': metrics.precision_score(y_true, y_pred, average='weighted')}
         elif mtype == 'recall':
-            return {'recall': metrics.recall_score(y_true, y_pred)}
+            return {'recall': metrics.recall_score(y_true, y_pred, average='weighted')}
 
     def _first_module(self):
         return self._modules[next(iter(self._modules))]

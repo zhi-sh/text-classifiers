@@ -4,3 +4,4 @@
 
 # ------------------------------------------------------------------------------
 from text_classifiers.models.TextCNN import TextCNN
+from text_classifiers.models.TextRNN import TextRNN

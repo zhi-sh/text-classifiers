@@ -8,7 +8,7 @@ from torch.utils.data import Dataset
 from text_classifiers.basics import InputExample
 
 
-class DFDataset(Dataset):
+class TextLabelPairDataset(Dataset):
     def __init__(self, examples, tokenizer):
         self.data = examples
         self.collate_fn = DFCollator(tokenizer)
@@ -20,17 +20,39 @@ class DFDataset(Dataset):
         return self.data[index]
 
     @staticmethod
-    def get_examples(fpath, xcol, ycol, delimiter='\t', max_examples=0):
+    def get_df_examples(fpath, xcol, ycol=None, delimiter='\t', max_examples=0):
         import pandas as pd
         df = pd.read_csv(fpath, delimiter=delimiter)
         examples = []
         for ix, r in df.iterrows():
             feats = r[xcol]
-            label = r[ycol]
+            if ycol is not None:
+                label = r[ycol]
+            else:
+                label = -1
             examples.append(InputExample(feats=feats, label=label))
 
             if 0 < max_examples <= len(examples):
                 return examples
+        return examples
+
+    @staticmethod
+    def get_text_examples(fpath, delimiter='\t', max_examples=0):
+        examples = []
+        with open(fpath, encoding='utf-8') as fr:
+            for line in fr:
+                pairs = line.strip().split(delimiter)
+                if len(pairs) == 2:
+                    feats = pairs[0]
+                    label = int(pairs[1])
+                    examples.append(InputExample(feats=feats, label=label))
+                elif len(pairs) == 1:
+                    feats = pairs[0]
+                    label = -1
+                    examples.append(InputExample(feats=feats, label=label))
+
+                if 0 < max_examples <= len(examples):
+                    return examples
         return examples
 
 

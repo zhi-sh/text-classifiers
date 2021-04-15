@@ -11,19 +11,20 @@ from text_classifiers.basics import AbstractModel
 
 
 class TextCNN(nn.Module, AbstractModel):
-    def __init__(self, vocab_size, output_size, embedding_dim=300, kernel_sizes=[2, 3, 4], num_kernels=100):
+    def __init__(self, vocab_size, output_size, embedding_dim=300, kernel_sizes=[2, 3, 4], num_kernels=100, dropout=0.1):
         super(TextCNN, self).__init__()
-        self.config_keys = ['vocab_size', 'output_size', 'embedding_dim', 'kernel_sizes', 'num_kernels']
+        self.config_keys = ['vocab_size', 'output_size', 'embedding_dim', 'kernel_sizes', 'num_kernels', 'dropout']
         self.vocab_size = vocab_size
         self.output_size = output_size
         self.embedding_dim = embedding_dim
         self.kernel_sizes = kernel_sizes
         self.num_kernels = num_kernels
+        self.dropout = dropout
 
         self.embeddings = nn.Embedding(num_embeddings=vocab_size, embedding_dim=embedding_dim, padding_idx=0)
         # 扩展 channel 维度，用 高度=ks，宽度=embedding_dim的 kernel_size去扫描文本矩阵[bs, 1, seq, emb_dim] => [bs, num, seq - ks, 1]
         self.cnns = nn.ModuleList([nn.Conv2d(in_channels=1, out_channels=num_kernels, kernel_size=(ks, embedding_dim)) for ks in kernel_sizes])
-        self.dropout = nn.Dropout(0.1)
+        self.dropout = nn.Dropout(dropout)
         self.fc = nn.Linear(in_features=len(kernel_sizes) * num_kernels, out_features=output_size)
 
     def forward(self, x):
