@@ -6,23 +6,31 @@
 import os
 import torch
 from torch import nn
-from torch.nn import functional as F
 from text_classifiers.basics import AbstractModel
 
 
 class TextRNN(nn.Module, AbstractModel):
-    def __init__(self, vocab_size, output_size, embedding_dim=300, hidden_size=256, num_layers=2, dropout=0.1):
+    r'''
+        TextRNN
+            1. 输入数据 [bs, seq],
+            2. 经embedding后变为[bs, seq, dim]
+            3. 经lstm层变为 [bs, seq, hid * bidir], 后续只取序列最后时间步 [bs, hid * bidir]
+            4. 经线性变换输出 [bs, out]
+    '''
+
+    def __init__(self, vocab_size, output_size, embedding_dim=300, hidden_size=256, num_layers=2, dropout=0.1, bidirectional=True):
         super(TextRNN, self).__init__()
-        self.config_keys = ['vocab_size', 'output_size', 'embedding_dim', 'hidden_size', 'num_layers']
+        self.config_keys = ['vocab_size', 'output_size', 'embedding_dim', 'hidden_size', 'num_layers', 'bidirectional']
         self.vocab_size = vocab_size
         self.output_size = output_size
         self.embedding_dim = embedding_dim
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.dropout = dropout
+        self.bidirectional = bidirectional
 
         self.embedding = nn.Embedding(num_embeddings=vocab_size, embedding_dim=embedding_dim, padding_idx=0)
-        self.rnn = nn.LSTM(input_size=embedding_dim, hidden_size=hidden_size, num_layers=num_layers, bidirectional=True, batch_first=True, dropout=dropout)
+        self.rnn = nn.LSTM(input_size=embedding_dim, hidden_size=hidden_size, num_layers=num_layers, bidirectional=bidirectional, batch_first=True, dropout=dropout)
         self.fc = nn.Linear(in_features=hidden_size * 2, out_features=output_size)
         self.dropout = nn.Dropout(dropout)
 

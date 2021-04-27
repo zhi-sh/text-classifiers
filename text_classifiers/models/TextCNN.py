@@ -11,6 +11,16 @@ from text_classifiers.basics import AbstractModel
 
 
 class TextCNN(nn.Module, AbstractModel):
+    r'''
+        TextCNN
+            1. 读入的数据 [bs, seq]
+            2. 经embedding后变为[bs, seq, dim]
+            3. 对第一维缩放，变为 [bs, 1, seq, dim]
+            4. 经多组CNN提取特征  [bs, num, seq - ks, 1] * N , 并进行dim=3维压缩
+            5. 对 dim=2 维进行最大池化，获取到 [bs, num] * N
+            6. 线性变换输出 [bs, out]
+    '''
+
     def __init__(self, vocab_size, output_size, embedding_dim=300, kernel_sizes=[2, 3, 4], num_kernels=100, dropout=0.1):
         super(TextCNN, self).__init__()
         self.config_keys = ['vocab_size', 'output_size', 'embedding_dim', 'kernel_sizes', 'num_kernels', 'dropout']
